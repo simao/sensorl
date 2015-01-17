@@ -1,0 +1,4 @@
+message Measurement {
+  required double value = 1;
+  required string time = 2;
+}

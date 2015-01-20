@@ -1,11 +1,15 @@
+package io.simao.sensorl.server
+
 import com.typesafe.scalalogging.LazyLogging
 import io.netty.bootstrap.ServerBootstrap
-import io.netty.channel.{ChannelHandlerContext, SimpleChannelInboundHandler, ChannelInitializer}
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
+import io.netty.channel.{ChannelHandlerContext, ChannelInitializer, SimpleChannelInboundHandler}
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder
 import io.netty.handler.codec.protobuf.ProtobufDecoder
+import io.simao.sensorl.message.Measurement
+import io.simao.sensorl.{LoggingReceiver, Receiver}
 
 class Server(val port: Int,
              receiverFn: Unit ⇒ Receiver = Unit ⇒ new LoggingReceiver) extends LazyLogging {

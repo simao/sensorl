@@ -14,3 +14,7 @@ libraryDependencies += "io.netty" % "netty-all" % "4.0.24.Final"
 
 libraryDependencies += "net.sandrogrzicic" %% "scalabuff-runtime" % "1.3.8"
 
+libraryDependencies += "joda-time" % "joda-time" % "2.6"
+
+libraryDependencies += "org.joda" % "joda-convert" % "1.7"
+

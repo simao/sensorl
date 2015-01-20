@@ -1,4 +1,10 @@
+package io.simao.sensorl
+
 import com.typesafe.scalalogging.LazyLogging
+import io.simao.sensorl.db.MeasurementDatabase
+import io.simao.sensorl.message.Measurement
+import io.simao.sensorl.server.Server
+
 
 trait Receiver {
   def receive(m: Measurement): Unit
@@ -18,6 +24,8 @@ class MeasurementReceiver extends Receiver {
 object Sensorl extends App {
 
   val server = new Server(6767)
+
+  val db = MeasurementDatabase.apply("")
 
   server.startServer()
 }

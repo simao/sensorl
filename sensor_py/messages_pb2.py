@@ -13,7 +13,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='messages.proto',
   package='',
-  serialized_pb='\n\x0emessages.proto\"*\n\x0bMeasurement\x12\r\n\x05value\x18\x01 \x02(\x01\x12\x0c\n\x04time\x18\x02 \x02(\t')
+  serialized_pb='\n\x0emessages.proto\"7\n\x0bMeasurement\x12\x0b\n\x03mid\x18\x01 \x02(\r\x12\r\n\x05value\x18\x02 \x02(\x01\x12\x0c\n\x04time\x18\x03 \x02(\t')
 
 
 
@@ -26,15 +26,22 @@ _MEASUREMENT = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='value', full_name='Measurement.value', index=0,
-      number=1, type=1, cpp_type=5, label=2,
+      name='mid', full_name='Measurement.mid', index=0,
+      number=1, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='time', full_name='Measurement.time', index=1,
-      number=2, type=9, cpp_type=9, label=2,
+      name='value', full_name='Measurement.value', index=1,
+      number=2, type=1, cpp_type=5, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='time', full_name='Measurement.time', index=2,
+      number=3, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -49,7 +56,7 @@ _MEASUREMENT = _descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=18,
-  serialized_end=60,
+  serialized_end=73,
 )
 
 DESCRIPTOR.message_types_by_name['Measurement'] = _MEASUREMENT

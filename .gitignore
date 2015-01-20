@@ -1,2 +1,3 @@
 .idea
 sensor_py/py
+*.pyc

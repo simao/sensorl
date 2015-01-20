@@ -21,7 +21,7 @@ socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket.connect(("127.0.0.1", 6767))
 
 m = messages_pb2.Measurement()
-m.mid = 1.0
+m.mid = 1
 m.value = 22.0
 m.time = "NOW"
 

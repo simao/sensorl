@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+set -u
+
+PROTO_PATH=src/main/scala/message
+SCALA_OUT=src/main/scala/message
+
+echo "Generating scala proto classes"
+
+scala bin/scalabuff-compiler_*.jar --proto_path=$PROTO_PATH --generate_json_method --scala_out=$SCALA_OUT
+
+find $SCALA_OUT -name "*.scala" -print0 |
+    xargs -0 sed -i -r -e 's/@reflect.BeanProperty/@beans.BeanProperty/g'
+
+echo "Generating python proto classes"
+
+cd sensor_py
+
+protoc --python_out=$(pwd) --proto_path=../$PROTO_PATH ../$PROTO_PATH/messages.proto
+

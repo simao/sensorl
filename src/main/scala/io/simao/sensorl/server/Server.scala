@@ -8,6 +8,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelInitializer, SimpleChannelInboundHandler}
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder
 import io.netty.handler.codec.protobuf.ProtobufDecoder
+import io.simao.sensorl.db.MeasurementDatabase
 import io.simao.sensorl.message.Measurement
 import io.simao.sensorl.{LoggingReceiver, Receiver}
 
@@ -55,6 +56,12 @@ class ServerChannelInitializer(receiverFn: Unit ⇒ Receiver) extends ChannelIni
 class ServerHandler(receiver: Receiver) extends SimpleChannelInboundHandler[Measurement] with LazyLogging {
   override def channelRead0(ctx: ChannelHandlerContext, msg: Measurement): Unit = {
     receiver.receive(msg)
+
+    val db = MeasurementDatabase
+      .withConnection[Unit]("jdbc:sqlite:measurements.db")({ db: MeasurementDatabase ⇒
+      db.setupTables()
+      db.save(msg)
+    })
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext , cause: Throwable ) {

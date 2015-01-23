@@ -25,7 +25,5 @@ object Sensorl extends App {
 
   val server = new Server(6767)
 
-  val db = MeasurementDatabase.apply("")
-
   server.startServer()
 }

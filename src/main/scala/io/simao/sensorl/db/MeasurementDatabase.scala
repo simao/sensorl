@@ -25,7 +25,7 @@ class MeasurementDatabase(connection: Connection) {
     item.tap { i ⇒
       val statement = connection.createStatement()
       val now = DateTime.now().toString
-      statement.executeUpdate(s"insert into measurements values('${item.guid}', '$now')")
+      statement.executeUpdate(s"insert into measurements values('${item.mid}', '${item.value}', '${item.time}')")
     }
   }
 

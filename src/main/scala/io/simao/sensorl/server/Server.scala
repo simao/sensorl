@@ -56,12 +56,6 @@ class ServerChannelInitializer(receiverFn: Unit ⇒ Receiver) extends ChannelIni
 class ServerHandler(receiver: Receiver) extends SimpleChannelInboundHandler[Measurement] with LazyLogging {
   override def channelRead0(ctx: ChannelHandlerContext, msg: Measurement): Unit = {
     receiver.receive(msg)
-
-    val db = MeasurementDatabase
-      .withConnection[Unit]("jdbc:sqlite:measurements.db")({ db: MeasurementDatabase ⇒
-      db.setupTables()
-      db.save(msg)
-    })
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext , cause: Throwable ) {

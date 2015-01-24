@@ -21,9 +21,19 @@ class MeasurementReceiver extends Receiver {
   }
 }
 
-object Sensorl extends App {
+class DatabaseReceiver(withDbFn: ((MeasurementDatabase) ⇒ Unit) ⇒ Unit) extends Receiver with LazyLogging {
+  def receive(m: Measurement): Unit = {
+    logger.info("new measurement" + m.toJson(4))
+    withDbFn (_.save(m))
+  }
+}
 
-  val server = new Server(6767)
+object Sensorl extends App {
+  val dbReceiverFn = (_: Unit) ⇒ {
+    new DatabaseReceiver(MeasurementDatabase.withConnection("jdbc:sqlite:measurements.db"))
+  }
+
+  val server = new Server(6767, dbReceiverFn)
 
   server.startServer()
 }

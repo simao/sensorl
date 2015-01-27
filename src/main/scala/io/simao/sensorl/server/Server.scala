@@ -8,9 +8,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelInitializer, SimpleChannelInboundHandler}
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder
 import io.netty.handler.codec.protobuf.ProtobufDecoder
-import io.simao.sensorl.db.MeasurementDatabase
 import io.simao.sensorl.message.Measurement
-import io.simao.sensorl.{LoggingReceiver, Receiver}
 
 class Server(val port: Int,
              receiverFn: Unit ⇒ Receiver = Unit ⇒ new LoggingReceiver) extends LazyLogging {

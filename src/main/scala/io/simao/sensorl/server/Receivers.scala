@@ -25,3 +25,11 @@ class DatabaseReceiver(withDbFn: ((MeasurementDatabase) ⇒ Measurement) ⇒ Mea
     withDbFn (_.save(m))
   }
 }
+
+class RRDToolReceiver extends Receiver with LazyLogging {
+  def receive(m: Measurement): Unit = {
+    val cmd = "rrdtool update test.rrd 920804700:12345"
+    val p = Runtime.getRuntime.exec(cmd)
+    p.waitFor()
+  }
+}

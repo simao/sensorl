@@ -1,7 +1,7 @@
 package io.simao.sensorl
 
 import io.simao.sensorl.db.MeasurementDatabase
-import io.simao.sensorl.server.{DatabaseReceiver, Server}
+import io.simao.sensorl.server.{RRDToolReceiver, DatabaseReceiver, Server}
 
 
 object Sensorl extends App {
@@ -9,7 +9,9 @@ object Sensorl extends App {
     new DatabaseReceiver(MeasurementDatabase.withConnection("jdbc:sqlite:measurements.db"))
   }
 
-  val server = new Server(6767, dbReceiverFn)
+  val rrdToolReceiverFn = (_: Unit) ⇒ { new RRDToolReceiver }
+
+  val server = new Server(6767, rrdToolReceiverFn)
 
   server.startServer()
 }

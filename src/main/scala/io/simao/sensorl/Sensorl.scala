@@ -10,7 +10,23 @@ object Sensorl extends App {
     new DatabaseReceiver(MeasurementDatabase.withConnection("jdbc:sqlite:measurements.db"))
   }
 
-  println(LibRRD.rrdcreate())
+  val rrdArgs = Array(
+    "/home/simao/code/sensorl/lol.rrd",
+    "--start", "920804400",
+    "DS:speed:COUNTER:600:U:U",
+    "RRA:AVERAGE:0.5:1:24",
+    "RRA:AVERAGE:0.5:6:10"
+  )
+
+  val updates = Array(
+    "/home/simao/code/sensorl/lol.rrd",
+    "920804700:12345",
+    "920805000:12357",
+    "920805300:12363"
+  )
+
+  println(LibRRD.rrdcreate(rrdArgs))
+  println(LibRRD.rrdupdate(updates))
 
   val rrdToolReceiverFn = (_: Unit) ⇒ { new RRDToolReceiver }
 

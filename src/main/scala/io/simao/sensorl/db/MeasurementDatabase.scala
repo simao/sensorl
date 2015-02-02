@@ -23,6 +23,8 @@ object MeasurementDatabase {
 class MeasurementDatabase(fileName: String) extends LazyLogging {
   def save(item: Measurement): Measurement = {
     item.tap { i ⇒
+      // new DateTime(item.time)
+      // Use item time
       val args = Array(fileName, s"N:${item.value}")
       LibRRD.rrdupdate(args)
     }
@@ -36,11 +38,13 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
 
     val rrdArgs = Array(
       fileName,
-      "DS:speed:COUNTER:600:U:U",
-      "RRA:AVERAGE:0.5:1:24",
-      "RRA:AVERAGE:0.5:6:10"
-    )
+      "--step", "10",
+      "DS:temp:GAUGE:600:-1:50",
+      "RRA:AVERAGE:0.5:1:1200",
+      "RRA:MIN:0.5:12:2400",
+      "RRA:MAX:0.5:12:2400",
+      "RRA:AVERAGE:0.5:12:2400")
 
-    LibRRD.rrdcreate(Array(fileName))
+    LibRRD.rrdcreate(rrdArgs)
   }
 }

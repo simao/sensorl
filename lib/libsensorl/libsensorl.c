@@ -31,6 +31,11 @@ JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdcreate
   char *args[argc+1];
   copyRrdArgs(env, jargs, argc, args);
 
+  int i;
+  for (i=0;i < argc+1;i++) {
+    printf("%s\n",args[i]);
+  }
+
   int res = rrd_create(argc+1, args); // TODO: Use _r
 
   if(res == -1)

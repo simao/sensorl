@@ -16,7 +16,7 @@ object MeasurementDatabase {
   def withConnection[T](fileName: String)(f: MeasurementDatabase ⇒ T) = {
     val db = MeasurementDatabase(fileName)
     try f(db)
-    finally {}
+    finally {} // woot
   }
 }
 
@@ -25,8 +25,8 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
     item.tap { i ⇒
       // new DateTime(item.time)
       // Use item time
-      val args = Array(fileName, s"N:${item.value}")
-      LibRRD.rrdupdate(args)
+      val args = Array(s"N:${item.value}")
+      LibRRD.rrdupdate(fileName, args)
     }
   }
 
@@ -37,14 +37,12 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
     }
 
     val rrdArgs = Array(
-      fileName,
-      "--step", "10",
-      "DS:temp:GAUGE:600:-1:50",
-      "RRA:AVERAGE:0.5:1:1200",
+      "DS:temp:GAUGE:20:-1:50",
+      "RRA:AVERAGE:0.5:1:8640",
+      "RRA:AVERAGE:0.5:12:2400",
       "RRA:MIN:0.5:12:2400",
-      "RRA:MAX:0.5:12:2400",
-      "RRA:AVERAGE:0.5:12:2400")
+      "RRA:MAX:0.5:12:2400")
 
-    LibRRD.rrdcreate(rrdArgs)
+    LibRRD.rrdcreate(fileName, 10, 0, rrdArgs)
   }
 }

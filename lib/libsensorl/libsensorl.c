@@ -14,29 +14,31 @@ void copyRrdArgs(JNIEnv *env, jobjectArray jargs, int argc, char** args)
 {
   int i;
 
-  args[0] = "dummy";
-
   for(i = 0; i < argc; i++) {
     jstring s = (*env)->GetObjectArrayElement(env, jargs, i);
-    const char *cString = (*env)->GetStringUTFChars(env, s, NULL);
-    args[i+1] = (char*)cString;
+    const char *cString = (*env)->GetStringUTFChars(env, s, NULL); // TODO: LEAK?
+    args[i] = (char*)cString;
   }
 }
 
 // jargs is an Array of Strings
 JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdcreate
-(JNIEnv *env, jclass cls, jobjectArray jargs)
+(JNIEnv * env, jclass cls, jstring jfilename, jint step, jint start, jobjectArray jargs)
 {
   int argc = (*env)->GetArrayLength(env, jargs);
-  char *args[argc+1];
+  char *args[argc];
   copyRrdArgs(env, jargs, argc, args);
 
-  int i;
-  for (i=0;i < argc+1;i++) {
-    printf("%s\n",args[i]);
-  }
+  /* int i; */
+  /* for (i=0;i < argc+1;i++) { */
+  /*   printf("%s\n",args[i]); */
+  /* } */
 
-  int res = rrd_create(argc+1, args); // TODO: Use _r
+  const char *filename = (*env)->GetStringUTFChars(env, jfilename, 0);
+
+  int res = rrd_create_r(filename, step, (time_t)NULL, argc, (const char**) args);
+
+  (*env)->ReleaseStringUTFChars(env, jfilename, filename);
 
   if(res == -1)
     throwRuntimeException(env, rrd_get_error());
@@ -45,13 +47,16 @@ JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdcreate
 }
 
 JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdupdate
-(JNIEnv *env, jclass cls, jobjectArray jargs)
+(JNIEnv * env, jclass cls, jstring jfilename, jobjectArray jargs)
 {
   int argc = (*env)->GetArrayLength(env, jargs);
-  char *args[argc+1];
+  char *args[argc];
   copyRrdArgs(env, jargs, argc, args);
+  const char *filename = (*env)->GetStringUTFChars(env, jfilename, 0);
   
-  int res = rrd_update(argc+1, args); // TODO: Use _r
+  int res = rrd_update_r(filename, NULL, argc, (const char**)args);
+
+  (*env)->ReleaseStringUTFChars(env, jfilename, filename);
 
   if(res == -1)
     throwRuntimeException(env, rrd_get_error());

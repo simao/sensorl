@@ -10,18 +10,18 @@ extern "C" {
 /*
  * Class:     io_simao_librrd_LibRRD
  * Method:    rrdcreate
- * Signature: ([Ljava/lang/String;)I
+ * Signature: (Ljava/lang/String;II[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdcreate
-  (JNIEnv *, jclass, jobjectArray);
+  (JNIEnv *, jclass, jstring, jint, jint, jobjectArray);
 
 /*
  * Class:     io_simao_librrd_LibRRD
  * Method:    rrdupdate
- * Signature: ([Ljava/lang/String;)I
+ * Signature: (Ljava/lang/String;[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdupdate
-  (JNIEnv *, jclass, jobjectArray);
+  (JNIEnv *, jclass, jstring, jobjectArray);
 
 #ifdef __cplusplus
 }

@@ -2,6 +2,13 @@
 #include "io_simao_librrd_LibRRD.h"
 #include <rrd.h>
 
+struct s_command {
+  char *filename;
+  char **args;
+  int argc;
+};
+
+
 jint throwRuntimeException( JNIEnv *env, char *message )
 {
   jclass exClass;
@@ -10,15 +17,30 @@ jint throwRuntimeException( JNIEnv *env, char *message )
   return (*env)->ThrowNew(env, exClass, message);
 }
 
-void copyRrdArgs(JNIEnv *env, jobjectArray jargs, int argc, char** args)
+s_command build_command(JNIEnv *env, jstring jfilename, jobjectArray jargs)
 {
   int i;
+
+  char *args[argc];
+
+  struct s_command command;
+
+  command.argc = (*env)->GetArrayLength(env, jargs);
+  command.args = malloc()
+  command.filename = 
 
   for(i = 0; i < argc; i++) {
     jstring s = (*env)->GetObjectArrayElement(env, jargs, i);
     const char *cString = (*env)->GetStringUTFChars(env, s, NULL); // TODO: LEAK?
-    args[i] = (char*)cString;
+    command.args[i] = (char*)cString;
   }
+}
+
+void free_command(jstring jfilename, s_command cmd)
+{
+  // for each arg free java string
+  free(cmd.args)
+  (*env)->ReleaseStringUTFChars(env, jfilename, filename);
 }
 
 // jargs is an Array of Strings

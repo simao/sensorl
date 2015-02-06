@@ -3,17 +3,15 @@ package io.simao.sensorl
 import io.simao.sensorl.db.MeasurementDatabase
 import io.simao.sensorl.server.{DatabaseReceiver, Server}
 
-
 object Sensorl extends App {
-  val db = "/home/simao/code/sensorl/temp.rrd"
-
+  val dbFilename = "/home/simao/code/sensorl/temp.rrd"
+  
   val dbReceiverFn = (_: Unit) ⇒ {
-    new DatabaseReceiver(MeasurementDatabase
-      .withConnection(db))
+    new DatabaseReceiver(MeasurementDatabase(dbFilename))
   }
 
-  MeasurementDatabase.withConnection(db)(_.setupDb(true))
-
+  // MeasurementDatabase(dbFilename).setupDb(true)
+  
   val server = new Server(6767, dbReceiverFn)
 
   server.startServer()

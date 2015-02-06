@@ -5,6 +5,8 @@ import com.typesafe.scalalogging.LazyLogging
 import io.simao.librrd.LibRRD
 import io.simao.sensorl.message.Measurement
 import io.simao.util.KestrelObj._
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 
 
 object MeasurementDatabase {
@@ -12,19 +14,13 @@ object MeasurementDatabase {
     val file = new File(fileName).getAbsolutePath
     new MeasurementDatabase(file)
   }
-
-  def withConnection[T](fileName: String)(f: MeasurementDatabase ⇒ T) = {
-    val db = MeasurementDatabase(fileName)
-    try f(db)
-    finally {} // woot
-  }
 }
 
 class MeasurementDatabase(fileName: String) extends LazyLogging {
   def save(item: Measurement): Measurement = {
     item.tap { i ⇒
-      // new DateTime(item.time)
-      // Use item time
+      val date = ISODateTimeFormat.dateTimeParser().parseDateTime(item.time)
+      val unixTime = java.lang.Long.valueOf(date.getMillis / 1000l)
       val args = Array(s"N:${item.value}")
       LibRRD.rrdupdate(fileName, args)
     }

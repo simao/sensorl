@@ -36,7 +36,6 @@ class Server(val port: Int,
   }
 }
 
-
 class ServerChannelInitializer(receiverFn: Unit ⇒ Receiver) extends ChannelInitializer[SocketChannel] {
   override def initChannel(ch: SocketChannel) {
     ch.pipeline().addLast("frameDecoder",

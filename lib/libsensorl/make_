@@ -2,5 +2,5 @@
 
 JAVA_HOME=/usr/lib/jvm/j2sdk1.7-oracle
 
-gcc -g -fPIC -c libsensorl.c -I $JAVA_HOME/include -I $JAVA_HOME/include/linux
+gcc -fPIC -c libsensorl.c -I $JAVA_HOME/include -I $JAVA_HOME/include/linux
 gcc libsensorl.o -lrrd -shared -o libsensorl.so -Wl,-soname,sensorl

@@ -31,11 +31,11 @@ struct s_command build_command(JNIEnv *env, jstring jfilename, jobjectArray jarg
   
   int i;
   for(i = 0; i < command.argc; i++) {
-    jstring s = (*env)->GetObjectArrayElement(env, jargs, i);
-    const char *cString = (*env)->GetStringUTFChars(env, s, JNI_FALSE);
-    command.args[i] = malloc(sizeof(char) * (strlen(cString) + 1));
-    strcpy(command.args[i], (char*)cString);
-    (*env)->ReleaseStringUTFChars(env, s, cString);
+    jstring jString = (*env)->GetObjectArrayElement(env, jargs, i);
+    const char *c_string = (*env)->GetStringUTFChars(env, jString, JNI_FALSE);
+    command.args[i] = malloc(sizeof(char) * (strlen(c_string) + 1));
+    strcpy(command.args[i], (char*)c_string);
+    (*env)->ReleaseStringUTFChars(env, jString, c_string);
   }
 
   return command;

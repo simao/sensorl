@@ -1,0 +1,11 @@
+#!/bin/bash
+set -u
+
+ssh sm-data@$1 'cd sensorl ; rrdtool graph temp.png \
+--end now --start end-12h --width 800 --height=400 \
+DEF:ds0a=temp.rrd:temp:AVERAGE \
+LINE1:ds0a#0000FF:"default resolution\l"'
+
+scp sm-data@$1:sensorl/temp.png .
+
+xdg-open temp.png

@@ -10,7 +10,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder
 import io.netty.handler.codec.protobuf.ProtobufDecoder
 import io.simao.sensorl.message.Measurement
 
-class Server(val port: Int,
+class MetricsServer(val port: Int,
              receiverFn: Unit ⇒ Receiver = Unit ⇒ new LoggingReceiver) extends LazyLogging {
 
   def startServer(): Unit = {
@@ -23,12 +23,12 @@ class Server(val port: Int,
         .channel(classOf[NioServerSocketChannel])
         .childHandler(new ServerChannelInitializer(receiverFn))
 
-      logger.info("Binding on port {}", port.toString)
+      logger.info("Starting MetricsServer Binding on port {}", port.toString)
       b.bind(port).sync().channel().closeFuture().sync()
 
     } catch {
       case t: Throwable =>
-        logger.error("Error on NodeServer", t)
+        logger.error("Error on MetricsServer", t)
     } finally {
       workerGroup.shutdownGracefully()
       bossGroup.shutdownGracefully()

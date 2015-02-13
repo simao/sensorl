@@ -5,7 +5,7 @@ import com.typesafe.scalalogging.LazyLogging
 import io.simao.librrd.LibRRD
 import io.simao.sensorl.message.Measurement
 import io.simao.util.KestrelObj._
-import org.joda.time.DateTime
+import org.joda.time.{DateTimeZone, DateTime}
 import org.joda.time.format.ISODateTimeFormat
 
 
@@ -17,11 +17,13 @@ object MeasurementDatabase {
 }
 
 class MeasurementDatabase(fileName: String) extends LazyLogging {
+  val timeParser = ISODateTimeFormat.dateTimeParser().withZone(DateTimeZone.UTC)
+
   def save(item: Measurement): Measurement = {
     item.tap { i ⇒
-      val date = ISODateTimeFormat.dateTimeParser().parseDateTime(item.time)
+      val date = timeParser.parseDateTime(i.time)
       val unixTime = java.lang.Long.valueOf(date.getMillis / 1000l)
-      val args = Array(s"N:${item.value}")
+      val args = Array(s"$unixTime:${i.value}")
       LibRRD.rrdupdate(fileName, args)
     }
   }

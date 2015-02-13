@@ -1,10 +1,9 @@
 package io.simao.librrd;
 
 public class LibRRD {
-    // TODO: Use _r versions
     static { System.loadLibrary("sensorl"); }
 
-    // TODO: We need to ensure thread safety on rrdupate calls
+    // TODO: We need to ensure thread safety on rrd* calls
 
     public static native int rrdcreate(String fileName,
                                        int step,

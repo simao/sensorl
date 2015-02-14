@@ -35,12 +35,15 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
     }
 
     val rrdArgs = Array(
-      "DS:temp:GAUGE:20:-1:50",
-      "RRA:AVERAGE:0.5:1:8640",
-      "RRA:AVERAGE:0.5:12:2400",
-      "RRA:MIN:0.5:12:2400",
-      "RRA:MAX:0.5:12:2400")
+      "dummy", // TODO: This should be on c side
+      file.getAbsolutePath,
+      "--end", "now",
+      "--start", "end-30m",
+      "--width=800", "--height=400",
+      s"DEF:ds0a=$fileName:temp:AVERAGE", // TODO: temp?!?
+      "LINE1:ds0a#0000FF:\"default resolution\""
+    )
 
-    LibRRD.rrdcreate(fileName, 10, 0, rrdArgs)
+    LibRRD.rrdgraph(rrdArgs)
   }
 }

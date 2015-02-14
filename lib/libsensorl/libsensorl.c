@@ -25,9 +25,13 @@ struct s_command build_command(JNIEnv *env, jstring jfilename, jobjectArray jarg
   command.argc = (*env)->GetArrayLength(env, jargs);
   command.args = malloc(sizeof(char*) * (command.argc+1));
 
-  const char *cFilename = (*env)->GetStringUTFChars(env, jfilename, JNI_FALSE);
-  command.filename = malloc(sizeof(char) * (strlen(cFilename) + 1));
-  strcpy(command.filename, cFilename);
+  if(jfilename != NULL) {
+    const char *cFilename = (*env)->GetStringUTFChars(env, jfilename, JNI_FALSE);
+    command.filename = malloc(sizeof(char) * (strlen(cFilename) + 1));
+    strcpy(command.filename, cFilename);
+  } else {
+    command.filename = NULL;
+  }
   
   int i;
   for(i = 0; i < command.argc; i++) {
@@ -48,7 +52,9 @@ void free_command(struct s_command cmd)
     free(cmd.args[i]);
   }
   free(cmd.args);
-  free(cmd.filename);
+  if(cmd.filename != NULL) {
+    free(cmd.filename);
+  }
 }
 
 void check_rrd_error(JNIEnv* env, int rrd_result) {
@@ -88,4 +94,22 @@ JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdupdate
   check_rrd_error(env, res);
 
   return res;
+}
+
+JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdgraph
+(JNIEnv * env, jclass cls, jobjectArray jargs)
+{
+  struct s_command cmd = build_command(env, NULL, jargs);
+
+  rrd_clear_error();
+
+  rrd_graph_v(cmd.argc, cmd.args);
+
+  free_command(cmd);
+
+  if (rrd_test_error()) {
+    throwRuntimeException(env, rrd_get_error());
+  }
+
+  return 0;
 }

@@ -11,4 +11,6 @@ public class LibRRD {
                                        String[] arguments);
 
     public static native int rrdupdate(String fileName, String[] arguments);
+
+    public static native int rrdgraph(String[] arguments);
 }

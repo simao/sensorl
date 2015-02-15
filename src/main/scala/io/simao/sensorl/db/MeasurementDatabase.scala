@@ -29,11 +29,26 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
   }
 
   def setupDb(drop: Boolean): Unit = {
+    val f = new File(fileName)
+
     if (drop) {
-      if(new File(fileName).delete())
+      if(f.delete())
         logger.info("Database {} deleted", fileName)
     }
 
+    if(!f.exists()) {
+      val rrdArgs = Array(
+        "DS:temp:GAUGE:20:-1:50",
+        "RRA:AVERAGE:0.5:1:8640",
+        "RRA:AVERAGE:0.5:12:2400",
+        "RRA:MIN:0.5:12:2400",
+        "RRA:MAX:0.5:12:2400")
+
+      LibRRD.rrdcreate(fileName, 10, 0, rrdArgs)
+    }
+  }
+
+  def graph(file: File) = {
     val rrdArgs = Array(
       "dummy", // TODO: This should be on c side
       file.getAbsolutePath,

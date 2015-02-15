@@ -23,7 +23,7 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
     item.tap { i ⇒
       val date = timeParser.parseDateTime(i.time)
       val unixTime = java.lang.Long.valueOf(date.getMillis / 1000l)
-      val args = Array(s"$unixTime:${i.value}")
+      val args = Array(s"N:${i.value}")
       LibRRD.rrdupdate(fileName, args)
     }
   }

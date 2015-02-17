@@ -8,6 +8,7 @@ struct s_command {
   char *filename;
   char **args;
   int argc;
+  
 };
 
 jint throwRuntimeException( JNIEnv *env, char *message )
@@ -18,6 +19,14 @@ jint throwRuntimeException( JNIEnv *env, char *message )
   return (*env)->ThrowNew(env, exClass, message);
 }
 
+char* copyJavaStr(JNIEnv *env, jstring jstr) {
+  const char *cStr = (*env)->GetStringUTFChars(env, jstr, JNI_FALSE);
+  char *dst = malloc(sizeof(char) * (strlen(cStr) + 1));
+  strcpy(dst, cStr);
+  (*env)->ReleaseStringUTFChars(env, jstr, cStr);
+  return dst;
+}
+
 struct s_command build_command(JNIEnv *env, jstring jfilename, jobjectArray jargs)
 {
   struct s_command command;
@@ -26,9 +35,7 @@ struct s_command build_command(JNIEnv *env, jstring jfilename, jobjectArray jarg
   command.args = malloc(sizeof(char*) * (command.argc+1));
 
   if(jfilename != NULL) {
-    const char *cFilename = (*env)->GetStringUTFChars(env, jfilename, JNI_FALSE);
-    command.filename = malloc(sizeof(char) * (strlen(cFilename) + 1));
-    strcpy(command.filename, cFilename);
+    command.filename = copyJavaStr(env, jfilename);
   } else {
     command.filename = NULL;
   }
@@ -112,4 +119,32 @@ JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdgraph
   }
 
   return 0;
+}
+
+JNIEXPORT jobjectArray JNICALL Java_io_simao_librrd_LibRRD_rrdfetch
+(JNIEnv * env, jclass cls, jstring jfilename, jstring jcf, jlong jstart, jlong end, jlong step, jlong ds_cnt, jobjectArray ds_namv)
+{
+  rrd_value_t *data;
+
+  char *cfilename = copyJavaStr(env, jfilename);
+  char *cf = copyJavaStr(env, jcf);
+  time_t start = (time_t) jstart;
+
+  int res = rrd_fetch_r(cfilename, cf, &start, &end, &step, &ds_cnt, NULL, &data);
+
+  // TODO: use rrd_test_error_instead
+  check_rrd_error(env, res);
+
+  jclass dataPointCls = (*env)->FindClass(env, "io/simao/librrd/RRDDataPoint");
+  jsize len = sizeof(data);
+  jobjectArray jResult = (*env)->NewObjectArray(env, len, dataPointCls, 0);
+
+  
+
+
+  free(data);
+  free(cfilename);
+  free(cf);
+
+  return NULL;
 }

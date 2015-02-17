@@ -13,4 +13,12 @@ public class LibRRD {
     public static native int rrdupdate(String fileName, String[] arguments);
 
     public static native int rrdgraph(String[] arguments);
+
+    public static native  RRDDataPoint[] rrdfetch(String filename,
+                                                  String cf,
+                                                  long start,
+                                                  long end,
+                                                  long step,
+                                                  long ds_cnt,
+                                                  String[] ds_namv);
 }

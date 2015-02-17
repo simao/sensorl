@@ -31,6 +31,14 @@ JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdupdate
 JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdgraph
   (JNIEnv *, jclass, jobjectArray);
 
+/*
+ * Class:     io_simao_librrd_LibRRD
+ * Method:    rrdfetch
+ * Signature: (Ljava/lang/String;Ljava/lang/String;JJJJ[Ljava/lang/String;)[Lio/simao/librrd/RRDDataPoint;
+ */
+JNIEXPORT jobjectArray JNICALL Java_io_simao_librrd_LibRRD_rrdfetch
+  (JNIEnv *, jclass, jstring, jstring, jlong, jlong, jlong, jlong, jobjectArray);
+
 #ifdef __cplusplus
 }
 #endif

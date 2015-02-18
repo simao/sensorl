@@ -122,29 +122,46 @@ JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdgraph
 }
 
 JNIEXPORT jobjectArray JNICALL Java_io_simao_librrd_LibRRD_rrdfetch
-(JNIEnv * env, jclass cls, jstring jfilename, jstring jcf, jlong jstart, jlong end, jlong step, jlong ds_cnt, jobjectArray ds_namv)
+(JNIEnv * env, jclass cls, jstring jfilename, jstring jcf, jlong jstart, jlong jend, jlong step)
 {
-  rrd_value_t *data;
-
+  // TODO: Needs free
   char *cfilename = copyJavaStr(env, jfilename);
   char *cf = copyJavaStr(env, jcf);
-  time_t start = (time_t) jstart;
 
-  int res = rrd_fetch_r(cfilename, cf, &start, &end, &step, &ds_cnt, NULL, &data);
+  rrd_value_t *data;
+  unsigned long ds_cnt;
+  char **ds_namv;
+
+  int res = rrd_fetch_r(cfilename, cf, &jstart, &jend, &step, &ds_cnt, &ds_namv, &data);
 
   // TODO: use rrd_test_error_instead
   check_rrd_error(env, res);
-
-  jclass dataPointCls = (*env)->FindClass(env, "io/simao/librrd/RRDDataPoint");
-  jsize len = sizeof(data);
-  jobjectArray jResult = (*env)->NewObjectArray(env, len, dataPointCls, 0);
-
   
+  int row_cnt = (jend - jstart)/step + 1;
+  int valuesLen = ds_cnt * row_cnt;
 
+  printf("%d\n", row_cnt);
+  printf("%d\n", valuesLen);
+  // printf("%s\n", ds_cnt);
 
-  free(data);
-  free(cfilename);
-  free(cf);
+  jclass dataPointCls = (*env)->FindClass(env, "[J"); // long[]
+  jobjectArray jResult = (*env)->NewObjectArray(env, row_cnt, dataPointCls, 0);
 
-  return NULL;
+  int i;
+  for(i = 0; i < row_cnt; i++) {
+    jlongArray longArray = (*env)->NewLongArray(env, valuesLen);
+    (*env)->SetLongArrayRegion(env, longArray,
+                               (jsize) 0,
+                               (jsize) valuesLen,
+                               (jlong*) &data[i]);
+    (*env)->SetObjectArrayElement(env, jResult, (jsize) i, longArray);
+    (*env)->DeleteLocalRef(env, longArray);
+  }
+
+  // free all the shit rrd_tool created, included nested data
+  //  free(data);
+  //  free(cfilename);
+  //  free(cf);
+
+  return jResult;
 }

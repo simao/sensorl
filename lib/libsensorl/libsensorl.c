@@ -8,7 +8,6 @@ struct s_command {
   char *filename;
   char **args;
   int argc;
-  
 };
 
 jint throwRuntimeException( JNIEnv *env, char *message )
@@ -21,7 +20,7 @@ jint throwRuntimeException( JNIEnv *env, char *message )
 
 char* copyJavaStr(JNIEnv *env, jstring jstr) {
   const char *cStr = (*env)->GetStringUTFChars(env, jstr, JNI_FALSE);
-  char *dst = malloc(sizeof(char) * (strlen(cStr) + 1));
+  char *dst = malloc(sizeof(char) * strlen(cStr) + 1);
   strcpy(dst, cStr);
   (*env)->ReleaseStringUTFChars(env, jstr, cStr);
   return dst;
@@ -39,7 +38,7 @@ struct s_command build_command(JNIEnv *env, jstring jfilename, jobjectArray jarg
   } else {
     command.filename = NULL;
   }
-  
+
   int i;
   for(i = 0; i < command.argc; i++) {
     jstring jString = (*env)->GetObjectArrayElement(env, jargs, i);
@@ -64,8 +63,8 @@ void free_command(struct s_command cmd)
   }
 }
 
-void check_rrd_error(JNIEnv* env, int rrd_result) {
-  if(rrd_result == -1)
+void check_rrd_error(JNIEnv* env) {
+  if (rrd_test_error())
     throwRuntimeException(env, rrd_get_error());
 }
 
@@ -84,7 +83,7 @@ JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdcreate
 
   free_command(cmd);
 
-  check_rrd_error(env, res);
+  check_rrd_error(env);
 
   return res;
 }
@@ -98,7 +97,7 @@ JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdupdate
 
   free_command(cmd);
 
-  check_rrd_error(env, res);
+  check_rrd_error(env);
 
   return res;
 }
@@ -121,47 +120,57 @@ JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdgraph
   return 0;
 }
 
-JNIEXPORT jobjectArray JNICALL Java_io_simao_librrd_LibRRD_rrdfetch
+JNIEXPORT jobject JNICALL Java_io_simao_librrd_LibRRD_rrdfetch
 (JNIEnv * env, jclass cls, jstring jfilename, jstring jcf, jlong jstart, jlong jend, jlong step)
 {
-  // TODO: Needs free
   char *cfilename = copyJavaStr(env, jfilename);
   char *cf = copyJavaStr(env, jcf);
 
   rrd_value_t *data;
   unsigned long ds_cnt;
-  char **ds_namv;
+  char **ds_names;
 
-  int res = rrd_fetch_r(cfilename, cf, &jstart, &jend, &step, &ds_cnt, &ds_namv, &data);
+  int res = rrd_fetch_r(cfilename, cf, &jstart, &jend, &step, &ds_cnt, &ds_names, &data);
 
-  // TODO: use rrd_test_error_instead
-  check_rrd_error(env, res);
-  
-  int row_cnt = (jend - jstart)/step + 1;
-  int valuesLen = ds_cnt * row_cnt;
+  check_rrd_error(env);
 
-  printf("%d\n", row_cnt);
-  printf("%d\n", valuesLen);
-  // printf("%s\n", ds_cnt);
+  unsigned long row_cnt = (jend - jstart)/step + 1;
+  unsigned long totalValues = ds_cnt * row_cnt;
 
-  jclass dataPointCls = (*env)->FindClass(env, "[J"); // long[]
-  jobjectArray jResult = (*env)->NewObjectArray(env, row_cnt, dataPointCls, 0);
+  jlongArray jData = (*env)->NewDoubleArray(env, totalValues);
+  (*env)->SetDoubleArrayRegion(env, jData, 0, totalValues, data);
 
-  int i;
-  for(i = 0; i < row_cnt; i++) {
-    jlongArray longArray = (*env)->NewLongArray(env, valuesLen);
-    (*env)->SetLongArrayRegion(env, longArray,
-                               (jsize) 0,
-                               (jsize) valuesLen,
-                               (jlong*) &data[i]);
-    (*env)->SetObjectArrayElement(env, jResult, (jsize) i, longArray);
-    (*env)->DeleteLocalRef(env, longArray);
+  jobjectArray jNames = (*env)->NewObjectArray(env, ds_cnt,
+                                               (*env)->FindClass(env, "java/lang/String"),
+                                               (*env)->NewStringUTF(env, ""));
+
+  unsigned long i;
+  for(i = 0; i < ds_cnt; i++) {
+    jobject jName = (*env)->NewStringUTF(env, ds_names[i]);
+    (*env)->SetObjectArrayElement(env, jNames, i, jName);
+    (*env)->DeleteLocalRef(env, jName);
+    free(ds_names[i]);
   }
+  free(ds_names);
 
-  // free all the shit rrd_tool created, included nested data
-  //  free(data);
-  //  free(cfilename);
-  //  free(cf);
+  jclass resultCls = (*env)->FindClass(env, "io/simao/librrd/RRDFetchResult");
+  jmethodID constr = (*env)->GetMethodID(env, resultCls, "<init>",
+                                         "(JJJJ[Ljava/lang/String;[D)V");
+
+  jobject jResult = (*env)->NewObject(env, resultCls, constr,
+                                      jstart,
+                                      jend,
+                                      step,
+                                      ds_cnt,
+                                      jNames,
+                                      jData);
+
+  free(cfilename);
+  free(cf);
+  free(data);
+  (*env)->DeleteLocalRef(env, jData);
+  (*env)->DeleteLocalRef(env, jNames);
+  (*env)->DeleteLocalRef(env, jResult);
 
   return jResult;
 }

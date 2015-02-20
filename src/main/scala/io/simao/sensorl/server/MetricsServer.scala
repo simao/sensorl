@@ -8,6 +8,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelInitializer, SimpleChannelInboundHandler}
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder
 import io.netty.handler.codec.protobuf.ProtobufDecoder
+import io.simao.librrd.LibRRD
 import io.simao.sensorl.message.Measurement
 
 class MetricsServer(val port: Int,

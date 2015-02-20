@@ -2,7 +2,7 @@ package io.simao.sensorl.db
 
 import java.io.File
 import com.typesafe.scalalogging.LazyLogging
-import io.simao.librrd.LibRRD
+import io.simao.librrd.{RRDTool, LibRRD}
 import io.simao.sensorl.message.Measurement
 import io.simao.util.KestrelObj._
 import org.joda.time.{DateTimeZone, DateTime}
@@ -23,8 +23,7 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
     item.tap { i ⇒
       val date = timeParser.parseDateTime(i.time)
       val unixTime = java.lang.Long.valueOf(date.getMillis / 1000l)
-      val args = Array(s"N:${i.value}")
-      LibRRD.rrdupdate(fileName, args)
+      RRDTool.update(fileName, unixTime, i.value);
     }
   }
 
@@ -44,21 +43,7 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
         "RRA:MIN:0.5:12:2400",
         "RRA:MAX:0.5:12:2400")
 
-      LibRRD.rrdcreate(fileName, 10, 0, rrdArgs)
+      RRDTool.create(fileName, 10, 0, rrdArgs)
     }
-  }
-
-  def graph(file: File) = {
-    val rrdArgs = Array(
-      "dummy", // TODO: This should be on c side
-      file.getAbsolutePath,
-      "--end", "now",
-      "--start", "end-30m",
-      "--width=800", "--height=400",
-      s"DEF:ds0a=$fileName:temp:AVERAGE", // TODO: temp?!?
-      "LINE1:ds0a#0000FF:\"default resolution\""
-    )
-
-    LibRRD.rrdgraph(rrdArgs)
   }
 }

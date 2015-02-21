@@ -1,3 +1,6 @@
 .idea
 py_sensor/PY
 *.pyc
+*.o
+*.so
+

@@ -74,11 +74,6 @@ JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdcreate
 {
   struct s_command cmd = build_command(env, jfilename, jargs);
 
-  /* int i; */
-  /* for (i=0;i < argc+1;i++) { */
-  /*   printf("%s\n",args[i]); */
-  /* } */
-
   int res = rrd_create_r(cmd.filename, step, (time_t)NULL, cmd.argc, (const char**)cmd.args);
 
   free_command(cmd);
@@ -148,7 +143,6 @@ JNIEXPORT jobject JNICALL Java_io_simao_librrd_LibRRD_rrdfetch
   for(i = 0; i < ds_cnt; i++) {
     jobject jName = (*env)->NewStringUTF(env, ds_names[i]);
     (*env)->SetObjectArrayElement(env, jNames, i, jName);
-    (*env)->DeleteLocalRef(env, jName);
     free(ds_names[i]);
   }
   free(ds_names);
@@ -168,9 +162,6 @@ JNIEXPORT jobject JNICALL Java_io_simao_librrd_LibRRD_rrdfetch
   free(cfilename);
   free(cf);
   free(data);
-  (*env)->DeleteLocalRef(env, jData);
-  (*env)->DeleteLocalRef(env, jNames);
-  (*env)->DeleteLocalRef(env, jResult);
 
   return jResult;
 }

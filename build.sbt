@@ -18,6 +18,11 @@ libraryDependencies += "joda-time" % "joda-time" % "2.6"
 
 libraryDependencies += "org.joda" % "joda-convert" % "1.7"
 
-libraryDependencies += "org.eclipse.jetty" % "jetty-server" % "9.2.7.v20150116"
+libraryDependencies += "org.eclipse.jetty" % "jetty-server" % "9.2.8.v20150217"
+
+libraryDependencies += "org.eclipse.jetty" % "jetty-servlet" % "9.2.8.v20150217"
+
+
+
 
 

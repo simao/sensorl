@@ -17,6 +17,8 @@ object MeasurementDatabase {
 }
 
 class MeasurementDatabase(fileName: String) extends LazyLogging {
+  type MeasurementT = (Long, Double)
+
   val timeParser = ISODateTimeFormat.dateTimeParser().withZone(DateTimeZone.UTC)
 
   def save(item: Measurement): Measurement = {
@@ -25,6 +27,27 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
       val unixTime = java.lang.Long.valueOf(date.getMillis / 1000l)
       RRDTool.update(fileName, unixTime, i.value);
     }
+  }
+
+  def fetchValues(end: DateTime, datasourceName: String, cf: String = "AVERAGE",
+                   step: Long = 10): List[MeasurementT] = {
+    val endM = end.getMillis / 1000l
+    val startM = end.minusMinutes(5).getMillis / 1000l
+
+    val v = RRDTool.fetch(fileName, cf, startM, endM, step)
+
+    val dsIdx = v.getDs_names.indexOf(datasourceName)
+    val data = v.getData
+
+    // TODO: Error handling, mutation
+
+    val res = for {
+      i ← Range(0, data.length)
+      idx = (dsIdx + 1) * i
+      ts = v.getStart + i * v.getStep
+    } yield (ts, data(idx))
+
+    res.toList
   }
 
   def setupDb(drop: Boolean): Unit = {

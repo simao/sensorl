@@ -32,13 +32,8 @@ public class RRDFetchResult {
         return data;
     }
 
-    public RRDFetchResult(
-            long start,
-            long end,
-            long step,
-            long ds_cnt,
-            String[] ds_names,
-            double[] data) {
+    public RRDFetchResult(long start, long end, long step, long ds_cnt,
+                          String[] ds_names, double[] data) {
         this.start = start;
         this.end = end;
         this.step = step;

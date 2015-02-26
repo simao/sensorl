@@ -129,8 +129,8 @@ JNIEXPORT jobject JNICALL Java_io_simao_librrd_LibRRD_rrdfetch
 
   check_rrd_error(env);
 
-  unsigned long row_cnt = (jend - jstart)/step + 1;
-  unsigned long totalValues = ds_cnt * row_cnt;
+  long row_cnt = (jend - jstart)/step;
+  long totalValues = ds_cnt * row_cnt;
 
   jlongArray jData = (*env)->NewDoubleArray(env, totalValues);
   (*env)->SetDoubleArrayRegion(env, jData, 0, totalValues, data);

@@ -29,10 +29,10 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
     }
   }
 
-  def fetchValues(end: DateTime, datasourceName: String, cf: String = "AVERAGE",
+  def fetchValues(start: DateTime, datasourceName: String, cf: String = "AVERAGE",
                    step: Long = 10): List[MeasurementT] = {
-    val endM = end.getMillis / 1000l
-    val startM = end.minusMinutes(5).getMillis / 1000l
+    val endM = (new DateTime).getMillis / 1000l
+    val startM = start.getMillis / 1000l
 
     val v = RRDTool.fetch(fileName, cf, startM, endM, step)
 
@@ -45,7 +45,7 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
       i ← Range(0, data.length)
       idx = (dsIdx + 1) * i
       ts = v.getStart + i * v.getStep
-    } yield (ts, data(idx))
+    } yield (ts * 1000, data(idx))
 
     res.toList
   }

@@ -116,7 +116,7 @@ JNIEXPORT jint JNICALL Java_io_simao_librrd_LibRRD_rrdgraph
 }
 
 JNIEXPORT jobject JNICALL Java_io_simao_librrd_LibRRD_rrdfetch
-(JNIEnv * env, jclass cls, jstring jfilename, jstring jcf, jlong jstart, jlong jend, jlong step)
+(JNIEnv * env, jclass cls, jstring jfilename, jstring jcf, jlong jstart, jlong jend, jlong jstep)
 {
   char *cfilename = copyJavaStr(env, jfilename);
   char *cf = copyJavaStr(env, jcf);
@@ -124,12 +124,12 @@ JNIEXPORT jobject JNICALL Java_io_simao_librrd_LibRRD_rrdfetch
   rrd_value_t *data;
   unsigned long ds_cnt;
   char **ds_names;
-
-  int res = rrd_fetch_r(cfilename, cf, &jstart, &jend, &step, &ds_cnt, &ds_names, &data);
+  
+  int res = rrd_fetch_r(cfilename, cf, &jstart, &jend, &jstep, &ds_cnt, &ds_names, &data);
 
   check_rrd_error(env);
 
-  long row_cnt = (jend - jstart)/step;
+  long row_cnt = (jend - jstart)/jstep;
   long totalValues = ds_cnt * row_cnt;
 
   jlongArray jData = (*env)->NewDoubleArray(env, totalValues);
@@ -154,7 +154,7 @@ JNIEXPORT jobject JNICALL Java_io_simao_librrd_LibRRD_rrdfetch
   jobject jResult = (*env)->NewObject(env, resultCls, constr,
                                       jstart,
                                       jend,
-                                      step,
+                                      jstep,
                                       ds_cnt,
                                       jNames,
                                       jData);

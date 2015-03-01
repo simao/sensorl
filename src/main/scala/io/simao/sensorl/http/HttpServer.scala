@@ -20,15 +20,28 @@ class MetricsApiServlet extends HttpServlet {
     MeasurementDatabase("temp.rrd")
   }
 
-  def values(): List[(Long, Double)] = {
-    db().fetchValues(new DateTime(), "temp")
+  def values(start: DateTime): List[(Long, Double)] = {
+    db().fetchValues(start, "temp")
+  }
+
+  def serializedValues(start: DateTime): String = {
+    "[\n" + values(start).map {
+        case (ts, v) if v.isNaN ⇒ s"[$ts, null]\n"
+        case (ts, v) ⇒ s"[$ts, $v]\n"
+    }.mkString(",") + "\n]"
+  }
+
+  def parseSince(s: Option[String]): DateTime = {
+    val i = s.map(Integer.valueOf)
+    new DateTime().minusHours(i.getOrElse[Integer](1))
   }
 
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
-    resp.setContentType("text/html")
+    val since = parseSince(Option(req.getParameter("since")))
+
+    resp.setContentType("application/json")
     resp.setStatus(HttpServletResponse.SC_OK)
-    resp.getWriter().println("<h1>Hello from HelloServlet</h1>")
-    resp.getWriter().println(values().mkString("<br>\n"))
+    resp.getWriter.println(serializedValues(since))
   }
 }
 

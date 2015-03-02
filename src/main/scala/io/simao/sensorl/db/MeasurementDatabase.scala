@@ -24,15 +24,15 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
   def save(item: Measurement): Measurement = {
     item.tap { i ⇒
       val date = timeParser.parseDateTime(i.time)
-      val unixTime = java.lang.Long.valueOf(date.getMillis / 1000l)
+      val unixTime = java.lang.Long.valueOf(date.toEpoch)
       RRDTool.update(fileName, unixTime, i.value);
     }
   }
 
   def fetchValues(start: DateTime, datasourceName: String, cf: String = "AVERAGE",
                    step: Long = 10): List[MeasurementT] = {
-    val endM = (new DateTime).getMillis / 1000l
-    val startM = start.getMillis / 1000l
+    val endM = (new DateTime).toEpoch
+    val startM = start.toEpoch
 
     val v = RRDTool.fetch(fileName, cf, startM, endM, step)
 

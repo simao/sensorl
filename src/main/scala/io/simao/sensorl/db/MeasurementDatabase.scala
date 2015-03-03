@@ -1,18 +1,61 @@
 package io.simao.sensorl.db
 
 import java.io.File
+import java.nio.file.{Paths, Path}
 import com.typesafe.scalalogging.LazyLogging
 import io.simao.librrd.{RRDTool, LibRRD}
 import io.simao.sensorl.message.Measurement
 import io.simao.util.KestrelObj._
 import org.joda.time.{DateTimeZone, DateTime}
 import org.joda.time.format.ISODateTimeFormat
+import io.simao.util.DateTimeToEpoch._
 
+// TODO: Looks like there is a problem if the file is empty!
+
+class MetricKey(repr: String) {
+  type MetricType = String
+  
+  // TODO: Invalid repr string?
+
+  def file()(implicit basePath: File): File = {
+    val filePath = Paths.get(basePath.getAbsolutePath, repr.split("/")(0) + ".rrd")
+    new File(filePath.toString)
+  }
+
+  def name: String = {
+    repr.split("/").lift(1).getOrElse(repr)
+  }
+
+  def metricType: MetricType = "GAUGE"
+}
 
 object MeasurementDatabase {
-  def apply(fileName: String) = {
-    val file = new File(fileName).getAbsolutePath
-    new MeasurementDatabase(file)
+  implicit val basePath = new File("db/")
+  
+  def apply(key: String): MeasurementDatabase = {
+    val metric = new MetricKey(key)
+    val file = metric.file
+
+    if(!file.exists()) {
+      createMetricsFile(metric)
+    }
+    
+    new MeasurementDatabase(file.getAbsolutePath)
+  }
+
+  // TODO: Multiple threads trying to create file raises havoc? Maybe not
+  private def createMetricsFile(metric: MetricKey): Unit = {
+    val rrdArgs = Array(
+      s"DS:${metric.name}:${metric.metricType}:20:-1:50",
+      "RRA:AVERAGE:0.5:1:8640",
+      "RRA:AVERAGE:0.5:12:2400",
+      "RRA:MIN:0.5:12:2400",
+      "RRA:MAX:0.5:12:2400")
+
+    // MAybe this is the problem?
+    val start = (new DateTime).toEpoch.toInt
+
+    RRDTool.create(metric.file.getAbsolutePath, 10, start, rrdArgs)
   }
 }
 
@@ -29,44 +72,21 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
     }
   }
 
-  def fetchValues(start: DateTime, datasourceName: String, cf: String = "AVERAGE",
+  def fetchValues(start: DateTime, cf: String = "AVERAGE",
                    step: Long = 10): List[MeasurementT] = {
     val endM = (new DateTime).toEpoch
     val startM = start.toEpoch
 
     val v = RRDTool.fetch(fileName, cf, startM, endM, step)
-
-    val dsIdx = v.getDs_names.indexOf(datasourceName)
+    assert(v.getDs_cnt == 1, "Only one data source per file is supported")
     val data = v.getData
 
     // TODO: Error handling, mutation
-
     val res = for {
-      i ← Range(0, data.length)
-      idx = (dsIdx + 1) * i
-      ts = v.getStart + i * v.getStep
+      idx ← Range(0, data.length) // We assume we only have one data source
+      ts = v.getStart + idx * v.getStep
     } yield (ts * 1000, data(idx))
 
     res.toList
-  }
-
-  def setupDb(drop: Boolean): Unit = {
-    val f = new File(fileName)
-
-    if (drop) {
-      if(f.delete())
-        logger.info("Database {} deleted", fileName)
-    }
-
-    if(!f.exists()) {
-      val rrdArgs = Array(
-        "DS:temp:GAUGE:20:-1:50",
-        "RRA:AVERAGE:0.5:1:8640",
-        "RRA:AVERAGE:0.5:12:2400",
-        "RRA:MIN:0.5:12:2400",
-        "RRA:MAX:0.5:12:2400")
-
-      RRDTool.create(fileName, 10, 0, rrdArgs)
-    }
   }
 }

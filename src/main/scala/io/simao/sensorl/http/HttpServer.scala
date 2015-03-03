@@ -13,38 +13,6 @@ import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MetricsApiServlet extends HttpServlet {
-
-  // TODO: How to inject this dependency
-  def db(): MeasurementDatabase = {
-    MeasurementDatabase("temp.rrd")
-  }
-
-  def values(start: DateTime): List[(Long, Double)] = {
-    db().fetchValues(start, "temp")
-  }
-
-  def serializedValues(start: DateTime): String = {
-    "[\n" + values(start).map {
-        case (ts, v) if v.isNaN ⇒ s"[$ts, null]\n"
-        case (ts, v) ⇒ s"[$ts, $v]\n"
-    }.mkString(",") + "\n]"
-  }
-
-  def parseSince(s: Option[String]): DateTime = {
-    val i = s.map(Integer.valueOf)
-    new DateTime().minusHours(i.getOrElse[Integer](1))
-  }
-
-  override def doGet(req: HttpServletRequest, resp: HttpServletResponse): Unit = {
-    val since = parseSince(Option(req.getParameter("since")))
-
-    resp.setContentType("application/json")
-    resp.setStatus(HttpServletResponse.SC_OK)
-    resp.getWriter.println(serializedValues(since))
-  }
-}
-
 class HttpServer(val dir: File, val port: Int = 8080) extends LazyLogging {
   def start()(implicit ec: ExecutionContext) = {
     val server = new Server(port)
@@ -55,7 +23,7 @@ class HttpServer(val dir: File, val port: Int = 8080) extends LazyLogging {
     resource_handler.setResourceBase(dir.getAbsolutePath)
 
     val handler = new ServletHandler()
-    handler.addServletWithMapping(classOf[MetricsApiServlet], "/api/*")
+    handler.addServletWithMapping(classOf[MetricsApiServlet], "/api/data")
 
     val handlers = new HandlerList()
     handlers.setHandlers(Array[Handler](resource_handler, handler, new DefaultHandler()))

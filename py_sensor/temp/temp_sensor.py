@@ -7,6 +7,7 @@ import time
 import Adafruit_MCP9808.MCP9808 as MCP9808
 import sys
 sys.path.append('.')
+sys.path.append('..')
 import socket
 import messages_pb2
 import struct

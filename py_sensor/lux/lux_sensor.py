@@ -26,13 +26,23 @@ def send_message(sock, message):
     sock.sendall(packed_len)
     sock.sendall(s)
 
-def build_msg(lux):
+def build_msg(value, sensor_name):
     m = messages_pb2.Measurement()
     m.mid = 0
-    m.value = lux
+    m.value = value
     m.time = datetime.utcnow().isoformat()
-    m.key = "lux"
+    m.key = sensor_name
     return m
+
+def sendAll(socket, sensor):
+    lux = sensor.readLux()
+    ambient = sensor.readFull()
+
+    print 'Lux: {0:0.3F}'.format(lux)
+    print 'Ambient: {0:0.3F}'.format(ambient)
+
+    send_message(socket, build_msg(lux, "lux"))
+    send_message(socket, build_msg(ambient, "ambient"))
 
 print sys.argv
 
@@ -40,9 +50,7 @@ socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 socket.connect((sys.argv[1], int(sys.argv[2])))
 
 while True:
-    lux = sensor.readLux()
-    send_message(socket, build_msg(lux))
-    print 'Lux: {0:0.3F}'.format(lux)
-    time.sleep(5.0)
+    send_message(socket, sensor)
+    time.sleep(3.0)
 
 socket.close()

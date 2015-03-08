@@ -2,55 +2,65 @@
 <html>
 <head>
   <title>Dashboard</title>
-  <link rel="stylesheet" href="foundation.min.css" />
+  <link rel="stylesheet" href="css/grid.css" />
   <meta charset="utf-8" />
 </head>
 <body>
 
-<div class="row">
-  <div class="small-12 columns">
-    <h1>Dashboard</h1>
-  </div>
-</div>
-
-<div class="row">
-  <div class="small-6 columns">
+<div class="container_15">
+  <div class="grid_5">
     <div id="temp-hour" class="chart" data-query="temp" data-period="1h" data-title="Last Hour" style="height:400px;"></div>
   </div>
 
-  <div class="small-6 columns">
-  <div id="lux-hour" class="chart" data-query="lux" data-period="1h" data-title="Last Hour" style="height:400px;"></div>
+  <div class="grid_5">
+    <div id="lux-hour" class="chart" data-query="lux" data-period="1h" data-title="Last Hour" style="height:400px;"></div>
+  </div>
+
+  <div class="grid_5">
+    <div id="ambient-hour" class="chart" data-query="ambient" data-period="1h" data-title="Last Hour" style="height:400px;"></div>
   </div>
 </div>
 
-<div class="row">
-  <div class="small-6 columns">
+<div class="container_15">
+  <div class="grid_5">
     <div id="temp-half-day" class="chart" data-query="temp" data-period="12h" data-title="last 12h" style="height:400px;"></div>
   </div>
 
-  <div class="small-6 columns">
+  <div class="grid_5">
     <div id="lux-half-day" class="chart" data-query="lux" data-period="12h" data-title="last 12h" style="height:400px;"></div>
+  </div>
+
+  <div class="grid_5">
+    <div id="ambient-half-day" class="chart" data-query="ambient" data-period="12h" data-title="Last 12h" style="height:400px;"></div>
   </div>
 </div>
 
-<div class="row">
-  <div class="small-6 columns">
+<div class="container_15">
+  <div class="grid_5">
     <div id="temp-day" class="chart" data-query="temp" data-period="24h" data-title="last 24h" style="height:400px;"></div>
   </div>
 
-  <div class="small-6 columns">
+  <div class="grid_5">
     <div id="lux-day" class="chart" data-query="lux" data-period="24h" data-title="last 24h" style="height:400px;"></div>
+  </div>
+
+  <div class="grid_5">
+    <div id="ambient-day" class="chart" data-query="ambient" data-period="24h" data-title="Last 24h" style="height:400px;"></div>
   </div>
 </div>
 
-<div class="row">
-  <div class="small-6 columns">
+<div class="container_15">
+  <div class="grid_5">
     <div id="temp-week" class="chart" data-query="temp" data-period="168h" data-title="last week" style="height:400px;"></div>
   </div>
 
-  <div class="small-6 columns">
+  <div class="grid_5">
     <div id="lux-week" class="chart" data-query="lux" data-period="168h" data-title="last week" style="height:400px;"></div>
   </div>
+
+    <div class="grid_5">
+      <div id="ambient-week" class="chart" data-query="ambient" data-period="168h" data-title="Last Week" style="height:400px;"></div>
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-2.1.3.js"></script>

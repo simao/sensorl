@@ -36,23 +36,34 @@ object MeasurementDatabase {
     val metric = new MetricKey(key)
     val file = metric.file
 
+    // TODO: Wait for update to fail before checking if file exists
+    // Or maybe just cache return values for this function?
     if(!file.exists()) {
-      createMetricsFile(metric)
+      ensureMetricsFileExists(file, metric)
     }
     
     new MeasurementDatabase(file.getAbsolutePath)
   }
 
+  private def ensureMetricsFileExists(file: File, key: MetricKey) = synchronized {
+    if(!file.exists()) {
+      createMetricsFile(key)
+    }
+  }
+
   // TODO: Multiple threads trying to create file raises havoc? Maybe not
   private def createMetricsFile(metric: MetricKey): Unit = {
+    // TODO: 50 max is not enough anymore
+
     val rrdArgs = Array(
-      s"DS:${metric.name}:${metric.metricType}:20:-1:50",
+      s"DS:${metric.name}:${metric.metricType}:20:U:U",
       "RRA:AVERAGE:0.5:1:8640",
       "RRA:AVERAGE:0.5:12:2400",
+      "RRA:LAST:0.5:1:8640",
+      "RRA:LAST:0.5:12:2400",
       "RRA:MIN:0.5:12:2400",
       "RRA:MAX:0.5:12:2400")
 
-    // MAybe this is the problem?
     val start = (new DateTime).toEpoch.toInt
 
     RRDTool.create(metric.file.getAbsolutePath, 10, start, rrdArgs)
@@ -72,21 +83,19 @@ class MeasurementDatabase(fileName: String) extends LazyLogging {
     }
   }
 
-  def fetchValues(start: DateTime, cf: String = "AVERAGE",
+  def fetchValues(start: DateTime, end: DateTime = new DateTime, cf: String = "AVERAGE",
                    step: Long = 10): List[MeasurementT] = {
-    val endM = (new DateTime).toEpoch
+    val endM = end.toEpoch
     val startM = start.toEpoch
 
     val v = RRDTool.fetch(fileName, cf, startM, endM, step)
-    assert(v.getDs_cnt == 1, "Only one data source per file is supported")
     val data = v.getData
 
-    // TODO: Error handling, mutation
-    val res = for {
-      idx ← Range(0, data.length) // We assume we only have one data source
+    assert(v.getDs_cnt == 1, "Only one data source per file is supported")
+
+    for {
+      idx ← List.range(0, data.length)
       ts = v.getStart + idx * v.getStep
     } yield (ts * 1000, data(idx))
-
-    res.toList
   }
 }

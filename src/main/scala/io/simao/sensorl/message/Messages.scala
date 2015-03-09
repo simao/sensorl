@@ -6,7 +6,8 @@ package io.simao.sensorl.message
 final case class Measurement (
 	`mid`: Int = 0,
 	`value`: Double = 0.0,
-	`time`: String = ""
+	`time`: String = "",
+	`key`: String = ""
 ) extends com.google.protobuf.GeneratedMessageLite
 	with com.google.protobuf.MessageLite.Builder
 	with net.sandrogrzicic.scalabuff.Message[Measurement]

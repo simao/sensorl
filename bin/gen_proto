@@ -3,8 +3,8 @@
 set -e
 set -u
 
-PROTO_PATH=src/main/scala/message
-SCALA_OUT=src/main/scala/message
+PROTO_PATH=src/main/scala/io/simao/sensorl/message
+SCALA_OUT=src/main/scala/
 
 echo "Generating scala proto classes"
 
@@ -15,7 +15,7 @@ find $SCALA_OUT -name "*.scala" -print0 |
 
 echo "Generating python proto classes"
 
-cd sensor_py
+cd py_sensor
 
 protoc --python_out=$(pwd) --proto_path=../$PROTO_PATH ../$PROTO_PATH/messages.proto
 

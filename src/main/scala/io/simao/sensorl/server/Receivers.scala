@@ -14,9 +14,9 @@ class LoggingReceiver extends Receiver with LazyLogging {
   }
 }
 
-class DatabaseReceiver(db: MeasurementDatabase) extends Receiver with LazyLogging {
+class DatabaseReceiver extends Receiver with LazyLogging {
   def receive(m: Measurement): Unit = {
     logger.info("new measurement" + m.toJson())
-    db.save(m)
+    MeasurementDatabase(m.key).save(m)
   }
 }

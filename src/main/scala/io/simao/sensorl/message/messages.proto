@@ -1,5 +1,8 @@
+package io.simao.sensorl.message;
+
 message Measurement {
-  required uint32 mid = 1;
-  required double value = 2;
-  required string time = 3;
+    required uint32 mid = 1;
+    required double value = 2;
+    required string time = 3;
+    required string key = 4;
 }

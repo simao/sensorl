@@ -1,0 +1,6 @@
+#!/bin/bash
+
+sbt assembly
+scp target/scala-2.11/sensorl-assembly-0.0.1.jar sm-data@simao.io:sensorl/sensorl.jar
+scp lib/libsensorl/libsensorl.so sm-data@simao.io:sensorl/libsensorl.so
+rsync -a http/ sm-data@simao.io:sensorl/http/

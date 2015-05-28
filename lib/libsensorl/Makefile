@@ -1,4 +1,4 @@
-JAVA_HOME := /usr/lib/jvm/j2sdk1.7-oracle
+JAVA_HOME := /usr/lib/jvm/jdk1.8.0_45
 GCC := gcc
 CFLAGS := -fPIC -c
 DEBUG_FLAGS := -g
